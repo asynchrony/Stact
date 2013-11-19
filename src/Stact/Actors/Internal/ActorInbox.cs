@@ -77,18 +77,32 @@ namespace Stact.Internal
 
         public PendingReceive Receive<T>(SelectiveConsumer<T> consumer)
         {
-            var pending = new PendingReceiveImpl<T>(this, consumer, x => _pending.Remove(x));
+            RemoveActivation removeActivation = null;
+            var pending = new PendingReceiveImpl<T>(this, consumer, x =>
+                {
+                    _pending.Remove(x);
+                    removeActivation();
+                });
 
-            return Receive(pending);
+            _engine.Configure(config => removeActivation = config.SelectiveReceive<T>(pending.Accept));
+            _pending.Add(pending);
+            return pending;
         }
 
         public PendingReceive Receive<T>(SelectiveConsumer<T> consumer, TimeSpan timeout, Action timeoutCallback)
         {
-            var pending = new PendingReceiveImpl<T>(this, consumer, timeoutCallback, x => _pending.Remove(x));
+            RemoveActivation removeActivation = null;
+            var pending = new PendingReceiveImpl<T>(this, consumer, timeoutCallback, x =>
+                {
+                    _pending.Remove(x);
+                    removeActivation();
+                });
 
             pending.ScheduleTimeout(x => _scheduler.Schedule(timeout, _fiber, x.Timeout));
 
-            return Receive(pending);
+            _engine.Configure(x => removeActivation = x.SelectiveReceive<T>(pending.Accept));
+            _pending.Add(pending);
+            return pending;
         }
 
         public void SetExceptionHandler(ActorExceptionHandler handler)
@@ -127,17 +141,6 @@ namespace Stact.Internal
                     {
                     }
                 });
-        }
-
-        PendingReceive Receive<T>(PendingReceiveImpl<T> receiver)
-        {
-            _engine.Configure(x =>
-                {
-                    x.SelectiveReceive<T>(receiver.Accept);
-                });
-
-            _pending.Add(receiver);
-            return receiver;
         }
     }
 }
