@@ -25,8 +25,8 @@ namespace Stact.Routing.Nodes
     /// <typeparam name="T"></typeparam>
     public class ActiveContextList<T>
     {
-        readonly IList<Func<RoutingContext<T>, bool>> _joins;
-        readonly IList<RoutingContext<T>> _messages;
+        readonly List<Func<RoutingContext<T>, bool>> _joins;
+        readonly List<RoutingContext<T>> _messages;
 
         public ActiveContextList()
         {
@@ -41,13 +41,15 @@ namespace Stact.Routing.Nodes
 
         public void Add(RoutingContext<T> message)
         {
-            _messages.Add(message);
-
             for (int i = _joins.Count - 1; i >= 0 && message.IsAlive; i--)
             {
                 if (false == _joins[i](message))
                     _joins.RemoveAt(i);
             }
+
+            _messages.Add(message);
+
+            _messages.RemoveAll(m => !m.IsAlive);
         }
 
         public void All(Func<RoutingContext<T>, bool> callback)
