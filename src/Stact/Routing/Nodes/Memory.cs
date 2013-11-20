@@ -104,21 +104,6 @@ namespace Stact.Routing.Nodes
 
         public void All(Func<RoutingContext<T>, bool> callback)
         {
-            Join(callback);
-        }
-
-        public void Any(RoutingContext<T> match, Action<RoutingContext<T>> callback)
-        {
-            if (!match.IsAlive)
-                return;
-
-            var message = _messages.FirstOrDefault(match.Equals);
-            if (message != null)
-                callback(message);
-        }
-
-        void Join(Func<RoutingContext<T>, bool> callback)
-        {
             RemoveDeadMessage();
 
             for (int i = 0; i < _messages.Count; i++)
@@ -129,6 +114,16 @@ namespace Stact.Routing.Nodes
             }
 
             _joins.Add(callback);
+        }
+
+        public void Any(RoutingContext<T> match, Action<RoutingContext<T>> callback)
+        {
+            if (!match.IsAlive)
+                return;
+
+            var message = _messages.FirstOrDefault(match.Equals);
+            if (message != null)
+                callback(message);
         }
     }
 }
