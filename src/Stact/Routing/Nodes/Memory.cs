@@ -10,6 +10,9 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using System.Linq;
+
 namespace Stact.Routing.Nodes
 {
     using System;
@@ -18,13 +21,15 @@ namespace Stact.Routing.Nodes
 
     public abstract class Memory<T>
     {
-        readonly ActiveContextList<T> _contexts;
         readonly ActivationList<T> _successors;
+        readonly List<Func<RoutingContext<T>, bool>> _joins;
+        readonly List<RoutingContext<T>> _messages;
 
         public Memory()
         {
-            _contexts = new ActiveContextList<T>();
             _successors = new ActivationList<T>();
+            _messages = new List<RoutingContext<T>>();
+            _joins = new List<Func<RoutingContext<T>, bool>>();
         }
 
 
@@ -35,7 +40,7 @@ namespace Stact.Routing.Nodes
 
         public int Count
         {
-            get { return _contexts.Count; }
+            get { return _messages.Where(x => x.IsAlive).Count(); }
         }
 
         public void Activate(RoutingContext<T> context)
@@ -58,26 +63,11 @@ namespace Stact.Routing.Nodes
             get { return _successors; }
         }
 
-        protected void Add(RoutingContext<T> message)
-        {
-            _contexts.Add(message);
-        }
-
-        protected void All(Func<RoutingContext<T>, bool> callback)
-        {
-            _contexts.All(callback);
-        }
-
-        protected void Any(RoutingContext<T> match, Action<RoutingContext<T>> callback)
-        {
-            _contexts.Any(match, callback);
-        }
-
         public void AddActivation(Activation<T> activation)
         {
             _successors.Add(activation);
 
-            _contexts.All(context =>
+            All(context =>
                 {
                     if (!activation.Enabled)
                         return false;
@@ -92,6 +82,53 @@ namespace Stact.Routing.Nodes
         public void RemoveActivation(Activation<T> activation)
         {
             _successors.Remove(activation);
+        }
+
+        public void Add(RoutingContext<T> message)
+        {
+            for (int i = _joins.Count - 1; i >= 0 && message.IsAlive; i--)
+            {
+                if (false == _joins[i](message))
+                    _joins.RemoveAt(i);
+            }
+
+            _messages.Add(message);
+
+            RemoveDeadMessage();
+        }
+
+        private void RemoveDeadMessage()
+        {
+            _messages.RemoveAll(m => !m.IsAlive);
+        }
+
+        public void All(Func<RoutingContext<T>, bool> callback)
+        {
+            Join(callback);
+        }
+
+        public void Any(RoutingContext<T> match, Action<RoutingContext<T>> callback)
+        {
+            if (!match.IsAlive)
+                return;
+
+            var message = _messages.FirstOrDefault(match.Equals);
+            if (message != null)
+                callback(message);
+        }
+
+        void Join(Func<RoutingContext<T>, bool> callback)
+        {
+            RemoveDeadMessage();
+
+            for (int i = 0; i < _messages.Count; i++)
+            {
+                bool result = callback(_messages[i]);
+                if (result == false)
+                    return;
+            }
+
+            _joins.Add(callback);
         }
     }
 }
