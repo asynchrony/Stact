@@ -22,14 +22,12 @@ namespace Stact.Routing.Nodes
     public abstract class Memory<T>
     {
         readonly ActivationList<T> _successors;
-        readonly List<Func<RoutingContext<T>, bool>> _joins;
         readonly List<RoutingContext<T>> _messages;
 
         public Memory()
         {
             _successors = new ActivationList<T>();
             _messages = new List<RoutingContext<T>>();
-            _joins = new List<Func<RoutingContext<T>, bool>>();
         }
 
 
@@ -86,10 +84,15 @@ namespace Stact.Routing.Nodes
 
         public void Add(RoutingContext<T> message)
         {
-            for (int i = _joins.Count - 1; i >= 0 && message.IsAlive; i--)
+            foreach (var activation in Successors.Reverse())
             {
-                if (false == _joins[i](message))
-                    _joins.RemoveAt(i);
+                if (!message.IsAlive)
+                    break;
+
+                if (activation.Enabled)
+                {
+                    activation.Activate(message);
+                }
             }
 
             _messages.Add(message);
@@ -106,14 +109,12 @@ namespace Stact.Routing.Nodes
         {
             RemoveDeadMessage();
 
-            for (int i = 0; i < _messages.Count; i++)
+            foreach (var routingContext in _messages)
             {
-                bool result = callback(_messages[i]);
-                if (result == false)
-                    return;
+                if (!callback(routingContext))
+                    break;
             }
 
-            _joins.Add(callback);
         }
 
         public void Any(RoutingContext<T> match, Action<RoutingContext<T>> callback)
