@@ -49,6 +49,11 @@ namespace Stact.Routing.Nodes
 
             _messages.Add(message);
 
+            RemoveDeadMessage();
+        }
+
+        private void RemoveDeadMessage()
+        {
             _messages.RemoveAll(m => !m.IsAlive);
         }
 
@@ -69,19 +74,13 @@ namespace Stact.Routing.Nodes
 
         void Join(Func<RoutingContext<T>, bool> callback)
         {
-            for (int i = 0; i < _messages.Count;)
-            {
-                if (!_messages[i].IsAlive)
-                {
-                    _messages.RemoveAt(i);
-                    continue;
-                }
+            RemoveDeadMessage();
 
+            for (int i = 0; i < _messages.Count; i++)
+            {
                 bool result = callback(_messages[i]);
                 if (result == false)
                     return;
-
-                i++;
             }
 
             _joins.Add(callback);
