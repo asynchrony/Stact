@@ -43,11 +43,6 @@ namespace Stact.Routing.Nodes
         {
             _messages.Add(message);
 
-            CallbackPendingJoins(message);
-        }
-
-        void CallbackPendingJoins(RoutingContext<T> message)
-        {
             for (int i = _joins.Count - 1; i >= 0 && message.IsAlive; i--)
             {
                 if (false == _joins[i](message))
@@ -62,19 +57,12 @@ namespace Stact.Routing.Nodes
 
         public void Any(RoutingContext<T> match, Action<RoutingContext<T>> callback)
         {
-            Join(message =>
-                {
-                    if (!match.IsAlive)
-                        return false;
+            if (!match.IsAlive)
+                return;
 
-                    if (match.Equals(message))
-                    {
-                        callback(message);
-                        return false;
-                    }
-
-                    return true;
-                });
+            var message = _messages.FirstOrDefault(match.Equals);
+            if (message != null)
+                callback(message);
         }
 
         void Join(Func<RoutingContext<T>, bool> callback)
