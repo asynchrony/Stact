@@ -1,0 +1,7 @@
+C:\Projects\Stact\src\Stact\bin\Release\Stact.XML
+C:\Projects\Stact\src\Stact\bin\Release\Stact.dll
+C:\Projects\Stact\src\Stact\bin\Release\Stact.pdb
+C:\Projects\Stact\src\Stact\bin\Release\Magnum.dll
+C:\Projects\Stact\src\Stact\bin\Release\Magnum.xml
+C:\Projects\Stact\src\Stact\obj\Release\Stact.dll
+C:\Projects\Stact\src\Stact\obj\Release\Stact.pdb
