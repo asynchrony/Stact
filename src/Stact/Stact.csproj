@@ -289,7 +289,6 @@
     <Compile Include="Routing\Contexts\RoutingContextFactory.cs" />
     <Compile Include="Routing\Internal\MatchAlphaNode.cs" />
     <Compile Include="Routing\Internal\MatchJoinNode.cs" />
-    <Compile Include="Routing\Nodes\ActiveContextList.cs" />
     <Compile Include="Routing\Nodes\ActivationList.cs" />
     <Compile Include="Routing\Nodes\Memory.cs" />
     <Compile Include="Routing\Nodes\AlphaNode.cs" />

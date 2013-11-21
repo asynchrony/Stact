@@ -21,10 +21,10 @@ namespace Stact.Routing.Nodes
 
     public abstract class Memory<T>
     {
-        readonly ActivationList<T> _successors;
-        readonly List<RoutingContext<T>> _messages;
+        private readonly ActivationList<T> _successors;
+        private readonly List<RoutingContext<T>> _messages;
 
-        public Memory()
+        protected Memory()
         {
             _successors = new ActivationList<T>();
             _messages = new List<RoutingContext<T>>();
@@ -38,7 +38,7 @@ namespace Stact.Routing.Nodes
 
         public int Count
         {
-            get { return _messages.Where(x => x.IsAlive).Count(); }
+            get { return _messages.Count(x => x.IsAlive); }
         }
 
         public void Activate(RoutingContext<T> context)
@@ -82,7 +82,7 @@ namespace Stact.Routing.Nodes
             _successors.Remove(activation);
         }
 
-        public void Add(RoutingContext<T> message)
+        private void Add(RoutingContext<T> message)
         {
             foreach (var activation in Successors.Reverse())
             {
@@ -100,12 +100,7 @@ namespace Stact.Routing.Nodes
             RemoveDeadMessage();
         }
 
-        private void RemoveDeadMessage()
-        {
-            _messages.RemoveAll(m => !m.IsAlive);
-        }
-
-        public void All(Func<RoutingContext<T>, bool> callback)
+        private void All(Func<RoutingContext<T>, bool> callback)
         {
             RemoveDeadMessage();
 
@@ -117,7 +112,7 @@ namespace Stact.Routing.Nodes
 
         }
 
-        public void Any(RoutingContext<T> match, Action<RoutingContext<T>> callback)
+        private void Any(RoutingContext<T> match, Action<RoutingContext<T>> callback)
         {
             if (!match.IsAlive)
                 return;
@@ -125,6 +120,11 @@ namespace Stact.Routing.Nodes
             var message = _messages.FirstOrDefault(match.Equals);
             if (message != null)
                 callback(message);
+        }
+
+        private void RemoveDeadMessage()
+        {
+            _messages.RemoveAll(m => !m.IsAlive);
         }
     }
 }
