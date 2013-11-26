@@ -106,9 +106,9 @@ namespace Stact.Routing.Nodes
         {
             RemoveDeadMessage();
 
-            foreach (var routingContext in _messages)
+            foreach (var message in _messages.ToList())
             {
-                if (!callback(routingContext))
+                if (!callback(message))
                     break;
             }
 
