@@ -84,7 +84,9 @@ namespace Stact.Routing.Nodes
 
         private void Add(RoutingContext<T> message)
         {
-            foreach (var activation in Successors.Reverse())
+            var activations = Successors.Reverse().ToList();
+            
+            foreach (var activation in activations)
             {
                 if (!message.IsAlive)
                     break;
