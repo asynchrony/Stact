@@ -10,6 +10,11 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using System.Runtime.Serialization.Formatters;
+using Magnum.Extensions;
+using Magnum.Reflection;
+
 namespace Stact
 {
     using System;
@@ -57,19 +62,62 @@ namespace Stact
                 return null;
 
             string typeName;
+            string assemblyName;
+            SplitFullyQualifiedTypeName(LocalPath.Substring(8), out typeName, out assemblyName);
 
-            if (names.Length == 2)
-                typeName = names[1];
-            else if (names.Length == 3)
-                typeName = names[1] + "." + names[2] + ", " + names[1];
-            else if (names.Length >= 4)
-                typeName = names[1] + "." + names[2] + ", " + names[3];
-            else
-                return null;
-
-            Type messageType = Type.GetType(typeName, true, true);
-
+            Type messageType = null;
+            try
+            {
+                messageType = Type.GetType("{0},{1}".FormatWith(typeName, assemblyName), true, true);
+            }
+            catch (Exception)
+            {
+                
+            }          
+            
             return messageType;
+        }
+
+        public static void SplitFullyQualifiedTypeName(string fullyQualifiedTypeName, out string typeName, out string assemblyName)
+        {
+            int? assemblyDelimiterIndex = GetAssemblyDelimiterIndex(fullyQualifiedTypeName);
+
+            if (assemblyDelimiterIndex != null)
+            {
+                typeName = fullyQualifiedTypeName.Substring(0, assemblyDelimiterIndex.Value).Trim();
+                assemblyName = fullyQualifiedTypeName.Substring(assemblyDelimiterIndex.Value + 1, fullyQualifiedTypeName.Length - assemblyDelimiterIndex.Value - 1).Trim();
+            }
+            else
+            {
+                typeName = fullyQualifiedTypeName;
+                assemblyName = null;
+            }
+        }
+
+        private static int? GetAssemblyDelimiterIndex(string fullyQualifiedTypeName)
+        {
+            // we need to get the first comma following all surrounded in brackets because of generic types
+            // e.g. System.Collections.Generic.Dictionary`2[[System.String, mscorlib,Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089],[System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+            int scope = 0;
+            for (int i = 0; i < fullyQualifiedTypeName.Length; i++)
+            {
+                char current = fullyQualifiedTypeName[i];
+                switch (current)
+                {
+                    case '[':
+                        scope++;
+                        break;
+                    case ']':
+                        scope--;
+                        break;
+                    case ',':
+                        if (scope == 0)
+                            return i;
+                        break;
+                }
+            }
+
+            return null;
         }
 
         static string IsInCache(Type type, Func<Type, string> provider)
@@ -90,68 +138,7 @@ namespace Stact
 
         static string GetUrnForType(Type type)
         {
-            return IsInCache(type, x =>
-                {
-                    var sb = new StringBuilder("urn:message:");
-
-                    return GetMessageName(sb, type, true);
-                });
-        }
-
-        static string GetMessageName(StringBuilder sb, Type type, bool includeScope)
-        {
-            if (includeScope && type.Namespace != null)
-            {
-                string ns = type.Namespace;
-                sb.Append(ns);
-
-                sb.Append(':');
-            }
-
-            if (type.IsNested)
-            {
-                GetMessageName(sb, type.DeclaringType, false);
-                sb.Append('+');
-            }
-
-            if (type.IsGenericType)
-            {
-                sb.Append(type.GetGenericTypeDefinition().FullName);
-                sb.Append('[');
-
-                Type[] arguments = type.GetGenericArguments();
-                for (int i = 0; i < arguments.Length; i++)
-                {
-                    if (i > 0)
-                        sb.Append(',');
-
-                    sb.Append('[');
-                    GetMessageName(sb, arguments[i], true);
-                    sb.Append(']');
-                }
-
-                sb.Append(']');
-            }
-            else
-                sb.Append(type.Name);
-
-            if (includeScope && type.Namespace != null)
-            {
-                string ns = type.Namespace;
-
-                string assembly = type.Assembly.FullName;
-                if (!string.IsNullOrEmpty(assembly))
-                {
-                    string assemblyName = assembly.Substring(0, assembly.IndexOf(','));
-                    if (assemblyName != ns)
-                    {
-                        sb.Append(':');
-                        sb.Append(assemblyName);
-                    }
-                }
-            }
-
-            return sb.ToString();
+            return IsInCache(type, x => string.Concat("urn:message:", x.AssemblyQualifiedName));
         }
     }
 }
