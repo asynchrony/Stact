@@ -4,3 +4,10 @@ C:\Projects\Stact\src\Stact\bin\Debug\Magnum.dll
 C:\Projects\Stact\src\Stact\bin\Debug\Magnum.xml
 C:\Projects\Stact\src\Stact\obj\Debug\Stact.dll
 C:\Projects\Stact\src\Stact\obj\Debug\Stact.pdb
+C:\Projects\business.services\submodules\Stact\src\Stact\obj\Debug\Stact.csprojResolveAssemblyReference.cache
+C:\Projects\business.services\submodules\Stact\src\Stact\obj\Debug\Stact.dll
+C:\Projects\business.services\submodules\Stact\src\Stact\obj\Debug\Stact.pdb
+C:\Projects\business.services\submodules\Stact\src\Stact\bin\Debug\Stact.dll
+C:\Projects\business.services\submodules\Stact\src\Stact\bin\Debug\Stact.pdb
+C:\Projects\business.services\submodules\Stact\src\Stact\bin\Debug\Magnum.dll
+C:\Projects\business.services\submodules\Stact\src\Stact\bin\Debug\Magnum.xml

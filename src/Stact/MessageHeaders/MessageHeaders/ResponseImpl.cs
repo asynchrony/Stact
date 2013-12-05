@@ -49,6 +49,8 @@ namespace Stact.MessageHeaders
 			{
 				Request = request.Body;
 				RequestId = request.RequestId;
+                CorrelationId = request.CorrelationId;
+                DestinationAddress = request.SenderAddress;
 			}
 		}
 

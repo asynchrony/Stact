@@ -101,9 +101,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\SolutionVersion.cs">
-      <Link>SolutionVersion.cs</Link>
-    </Compile>
     <Compile Include="Actors\Actor.cs" />
     <Compile Include="Actors\ActorConvention.cs" />
     <Compile Include="Actors\ActorRef.cs" />
