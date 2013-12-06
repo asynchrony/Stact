@@ -18,6 +18,5 @@ C:\Projects\BusinessServices\submodules\Stact\src\Stact\bin\Release\Stact.dll
 C:\Projects\BusinessServices\submodules\Stact\src\Stact\bin\Release\Stact.pdb
 C:\Projects\BusinessServices\submodules\Stact\src\Stact\bin\Release\Magnum.dll
 C:\Projects\BusinessServices\submodules\Stact\src\Stact\bin\Release\Magnum.xml
-C:\Projects\BusinessServices\submodules\Stact\src\Stact\obj\Release\Stact.csprojResolveAssemblyReference.cache
 C:\Projects\BusinessServices\submodules\Stact\src\Stact\obj\Release\Stact.dll
 C:\Projects\BusinessServices\submodules\Stact\src\Stact\obj\Release\Stact.pdb

@@ -65,15 +65,7 @@ namespace Stact
             string assemblyName;
             SplitFullyQualifiedTypeName(LocalPath.Substring(8), out typeName, out assemblyName);
 
-            Type messageType = null;
-            try
-            {
-                messageType = Type.GetType("{0},{1}".FormatWith(typeName, assemblyName), true, true);
-            }
-            catch (Exception)
-            {
-                
-            }          
+            var messageType = Type.GetType("{0},{1}".FormatWith(typeName, assemblyName), true, true);
             
             return messageType;
         }
