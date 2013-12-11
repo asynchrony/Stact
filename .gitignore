@@ -5,9 +5,7 @@ build_artifacts/*
 **/**/*.suo
 *.user
 bin
-!src/Stact/bin
 obj
-!src/Stact/obj
 _ReSharper*
 
 *.csproj.user
