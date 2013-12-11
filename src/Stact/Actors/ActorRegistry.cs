@@ -95,5 +95,6 @@ namespace Stact
 		                            Channel<ActorUnregistered> unregisteredListener);
 
 		void AddNode(RegistryNode registryNode);
+	    void Count(Action<int> callback);
 	}
 }

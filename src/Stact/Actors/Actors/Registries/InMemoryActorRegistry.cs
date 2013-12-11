@@ -164,6 +164,11 @@ namespace Stact.Actors.Registries
 			});
 		}
 
+        public void Count(Action<int> callback)
+        {
+            _fiber.Add(() => callback(_keyIndex.Count));
+        }
+
 		public ChannelConnection Subscribe(Action<ConnectionConfigurator> subscriberActions)
 		{
 			return _events.Connect(subscriberActions);
