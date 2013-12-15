@@ -20,6 +20,8 @@ namespace Stact.Routing
         bool IsAlive { get; }
 
         void Evict();
+
+        event Action<RoutingContext> OnEvicted;
     }
 
 

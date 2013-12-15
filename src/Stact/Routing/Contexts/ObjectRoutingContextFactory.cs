@@ -16,7 +16,6 @@ namespace Stact.Routing.Contexts
 
 
     public class ObjectRoutingContextFactory<T> :
-        AbstractRoutingContext,
         RoutingContextFactory
     {
         public void Create(object message, Activation activation)

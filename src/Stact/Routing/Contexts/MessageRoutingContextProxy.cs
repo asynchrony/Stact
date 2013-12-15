@@ -39,7 +39,12 @@ namespace Stact.Routing.Contexts
         public void Evict()
         {
             _input.Evict();
+
+            if (OnEvicted != null)
+                OnEvicted(this);
         }
+
+        public event Action<RoutingContext> OnEvicted;
 
         public Message<TOutput> Body
         {

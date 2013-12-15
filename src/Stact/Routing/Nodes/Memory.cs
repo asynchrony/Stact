@@ -38,7 +38,7 @@ namespace Stact.Routing.Nodes
 
         public int Count
         {
-            get { return _messages.Count(x => x.IsAlive); }
+            get { return _messages.Count; }
         }
 
         public void Activate(RoutingContext<T> context)
@@ -89,7 +89,7 @@ namespace Stact.Routing.Nodes
             foreach (var activation in activations)
             {
                 if (!message.IsAlive)
-                    break;
+                    return;
 
                 if (activation.Enabled)
                 {
@@ -98,20 +98,20 @@ namespace Stact.Routing.Nodes
             }
 
             _messages.Add(message);
-
-            RemoveDeadMessage();
+            message.OnEvicted += EvictMessage;
+        }
+        private void EvictMessage(RoutingContext message)
+        {
+            _messages.Remove((RoutingContext<T>)message);
         }
 
         private void All(Func<RoutingContext<T>, bool> callback)
         {
-            RemoveDeadMessage();
-
             foreach (var message in _messages.ToList())
             {
                 if (!callback(message))
                     break;
             }
-
         }
 
         private void Any(RoutingContext<T> match, Action<RoutingContext<T>> callback)
@@ -122,11 +122,6 @@ namespace Stact.Routing.Nodes
             var message = _messages.FirstOrDefault(match.Equals);
             if (message != null)
                 callback(message);
-        }
-
-        private void RemoveDeadMessage()
-        {
-            _messages.RemoveAll(m => !m.IsAlive);
         }
     }
 }

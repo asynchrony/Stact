@@ -10,9 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+using System;
+
 namespace Stact.Routing.Contexts
 {
-    public abstract class AbstractRoutingContext
+    public abstract class AbstractRoutingContext : RoutingContext
     {
         bool _alive = true;
 
@@ -24,6 +27,12 @@ namespace Stact.Routing.Contexts
         public void Evict()
         {
             _alive = false;
+
+            if (OnEvicted != null)
+                OnEvicted(this);
+
         }
+
+        public event Action<RoutingContext> OnEvicted;
     }
 }
