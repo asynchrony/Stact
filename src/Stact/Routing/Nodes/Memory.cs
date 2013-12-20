@@ -65,13 +65,13 @@ namespace Stact.Routing.Nodes
         {
             _successors.Add(activation);
 
-            All(context =>
+            All(message =>
                 {
                     if (!activation.Enabled)
                         return false;
 
-                    if (context.IsAlive)
-                        activation.Activate(context);
+                    if (message.IsAlive)
+                        activation.Activate(message);
 
                     return true;
                 });
@@ -84,9 +84,7 @@ namespace Stact.Routing.Nodes
 
         private void Add(RoutingContext<T> message)
         {
-            var activations = Successors.Reverse().ToList();
-            
-            foreach (var activation in activations)
+            foreach (var activation in _successors)
             {
                 if (!message.IsAlive)
                     return;
@@ -98,8 +96,10 @@ namespace Stact.Routing.Nodes
             }
 
             _messages.Add(message);
+            
             message.OnEvicted += EvictMessage;
         }
+
         private void EvictMessage(RoutingContext message)
         {
             _messages.Remove((RoutingContext<T>)message);

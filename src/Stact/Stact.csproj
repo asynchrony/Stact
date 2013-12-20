@@ -85,10 +85,7 @@
     <Reference Include="Magnum" Condition="'$(TargetFrameworkVersion)' == 'v4.0'">
       <HintPath>..\packages\Magnum.2.1.1\lib\NET40\Magnum.dll</HintPath>
     </Reference>
-    <Reference Include="System.Threading, Version=1.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" Condition="'$(TargetFrameworkVersion)' == 'v3.5'">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\Rx\Net35\System.Threading.dll</HintPath>
-    </Reference>
+    <Reference Include="System.Numerics" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -314,6 +311,7 @@
     <Compile Include="Schedulers\Internal\ShutdownSchedulerOnDispose.cs" />
     <Compile Include="Schedulers\SchedulerException.cs" />
     <Compile Include="SendExtensions.cs" />
+    <Compile Include="StactDiagnosticState.cs" />
     <Compile Include="StactException.cs" />
     <Compile Include="MessageHeaders\Command.cs" />
     <Compile Include="Internal\ThreadSingleton.cs" />
