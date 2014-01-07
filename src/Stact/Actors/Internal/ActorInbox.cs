@@ -77,30 +77,34 @@ namespace Stact.Internal
 
         public PendingReceive Receive<T>(SelectiveConsumer<T> consumer)
         {
-            RemoveActivation removeActivation = null;
-            var pending = new PendingReceiveImpl<T>(this, consumer, x =>
-                {
-                    _pending.Remove(x);
-                    removeActivation();
-                });
+            var pending = new PendingReceiveImpl<T>(this, consumer, x => _pending.Remove(x));
 
-            _engine.Configure(config => removeActivation = config.SelectiveReceive<T>(pending.Accept));
+            _engine.Configure(config =>
+                {
+                    if (pending.Cancelled) return;
+                    
+                    RemoveActivation removeActivation = config.SelectiveReceive<T>(pending.Accept);
+                    pending.OnCompleted += x => removeActivation();
+                });
             _pending.Add(pending);
             return pending;
         }
 
         public PendingReceive Receive<T>(SelectiveConsumer<T> consumer, TimeSpan timeout, Action timeoutCallback)
         {
-            RemoveActivation removeActivation = null;
-            var pending = new PendingReceiveImpl<T>(this, consumer, timeoutCallback, x =>
-                {
-                    _pending.Remove(x);
-                    removeActivation();
-                });
+            var pending = new PendingReceiveImpl<T>(this, consumer, timeoutCallback, x => _pending.Remove(x));
 
             pending.ScheduleTimeout(x => _scheduler.Schedule(timeout, _fiber, x.Timeout));
 
-            _engine.Configure(x => removeActivation = x.SelectiveReceive<T>(pending.Accept));
+            _engine.Configure(config =>
+                {
+                    if (pending.Cancelled) return;
+
+                    RemoveActivation removeActivation = config.SelectiveReceive<T>(pending.Accept);
+                    pending.OnCompleted += x => removeActivation();
+                });
+                    
+                
             _pending.Add(pending);
             return pending;
         }

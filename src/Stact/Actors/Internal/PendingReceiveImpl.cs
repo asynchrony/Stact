@@ -10,6 +10,8 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+
+
 namespace Stact.Actors.Internal
 {
     using System;
@@ -21,12 +23,12 @@ namespace Stact.Actors.Internal
     public class PendingReceiveImpl<TMessage> :
         PendingReceive
     {
-        readonly Action<PendingReceiveImpl<TMessage>> _onComplete;
         readonly SelectiveConsumer<TMessage> _selectiveConsumer;
         readonly Action _timeoutCallback;
-        bool _cancel;
+        private bool _cancel;
         Inbox _inbox;
         ScheduledOperation _scheduledAction;
+        public event Action<PendingReceiveImpl<TMessage>> OnCompleted;
 
         public PendingReceiveImpl(Inbox inbox, SelectiveConsumer<TMessage> selectiveConsumer, Action timeoutCallback,
                                   Action<PendingReceiveImpl<TMessage>> onComplete)
@@ -34,7 +36,7 @@ namespace Stact.Actors.Internal
             _selectiveConsumer = selectiveConsumer;
             _inbox = inbox;
             _timeoutCallback = timeoutCallback;
-            _onComplete = onComplete;
+            OnCompleted += onComplete;
         }
 
         public PendingReceiveImpl(Inbox inbox, SelectiveConsumer<TMessage> selectiveConsumer,
@@ -47,7 +49,7 @@ namespace Stact.Actors.Internal
         {
             _cancel = true;
 
-            _onComplete(this);
+            OnCompleted(this);
         }
 
         public void Send<T>(T message)
@@ -75,6 +77,11 @@ namespace Stact.Actors.Internal
             get { return _inbox.LinkedActors; }
         }
 
+        public bool Cancelled
+        {
+            get { return _cancel; }
+        }
+
         public ChannelConnection Connect(Action<ConnectionConfigurator> subscriberActions)
         {
             return _inbox.Connect(subscriberActions);
@@ -91,7 +98,7 @@ namespace Stact.Actors.Internal
 
         public Consumer<TMessage> Accept(TMessage message)
         {
-            if (_cancel)
+            if (Cancelled)
                 return null;
 
             Consumer<TMessage> consumer = _selectiveConsumer(message);
@@ -104,18 +111,18 @@ namespace Stact.Actors.Internal
 
                     consumer(m);
 
-                    _onComplete(this);
+                    OnCompleted(this);
                 };
         }
 
         public void Timeout()
         {
-            if (_cancel)
+            if (Cancelled)
                 return;
 
             _timeoutCallback();
 
-            _onComplete(this);
+            OnCompleted(this);
         }
 
         void CancelTimeout()
