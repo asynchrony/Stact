@@ -11,19 +11,17 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 
-using System.Linq;
-
 namespace Stact.Routing.Nodes
 {
     using System;
     using System.Collections.Generic;
-
-
+    using System.Linq;
+    
     public abstract class Memory<T>
     {
         private readonly ActivationList<T> _successors;
         private readonly List<RoutingContext<T>> _messages;
-
+        
         protected Memory()
         {
             _successors = new ActivationList<T>();
@@ -95,8 +93,10 @@ namespace Stact.Routing.Nodes
                 }
             }
 
+            if (!message.IsAlive)
+                return;
+
             _messages.Add(message);
-            
             message.OnEvicted += EvictMessage;
         }
 

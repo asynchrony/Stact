@@ -27,10 +27,12 @@ namespace Stact.Routing.Contexts
         public MessageRoutingContextProxy(RoutingContext<TInput> input, Message<TInput> message)
         {
             _input = input;
+            _input.OnEvicted += context => { if (OnEvicted != null) OnEvicted(this); };
+
             _message = new MessageProxy<TInput, TOutput>(message);
             _priority = input.Priority - 1000;
         }
-
+        
         public bool IsAlive
         {
             get { return _input.IsAlive; }
@@ -39,9 +41,6 @@ namespace Stact.Routing.Contexts
         public void Evict()
         {
             _input.Evict();
-
-            if (OnEvicted != null)
-                OnEvicted(this);
         }
 
         public event Action<RoutingContext> OnEvicted;

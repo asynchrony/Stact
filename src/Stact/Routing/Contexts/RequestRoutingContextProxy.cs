@@ -27,6 +27,8 @@ namespace Stact.Routing.Contexts
         public RequestRoutingContextProxy(RoutingContext<TInput> input, Request<TInput> request)
         {
             _input = input;
+            _input.OnEvicted += context => { if (OnEvicted != null) OnEvicted(this); };
+
             _request = new RequestProxy<TInput, TOutput>(request);
             _priority = input.Priority - 1000;
         }
@@ -39,9 +41,6 @@ namespace Stact.Routing.Contexts
         public void Evict()
         {
             _input.Evict();
-
-            if (OnEvicted != null)
-                OnEvicted(this);
         }
 
         public event Action<RoutingContext> OnEvicted;
