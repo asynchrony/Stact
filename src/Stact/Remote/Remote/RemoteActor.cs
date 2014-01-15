@@ -28,7 +28,7 @@ namespace Stact.Remote
 
 		public RemoteActor(HeaderChannel output, Uri remoteAddress)
 		{
-			_destinationAddress = ActorUrn.CreateFromRemoteAddress(remoteAddress).ToString();
+			_destinationAddress = remoteAddress.ToString();
 
 			HeaderChannel headerChannel = new DestinationHeaderChannel(output, _destinationAddress);
 
