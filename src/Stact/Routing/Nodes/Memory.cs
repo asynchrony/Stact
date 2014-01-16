@@ -105,13 +105,9 @@ namespace Stact.Routing.Nodes
             _messages.Remove((RoutingContext<T>)message);
         }
 
-        private void All(Func<RoutingContext<T>, bool> callback)
+        private bool All(Func<RoutingContext<T>, bool> callback)
         {
-            foreach (var message in _messages.ToList())
-            {
-                if (!callback(message))
-                    break;
-            }
+            return _messages.All(callback);
         }
 
         private void Any(RoutingContext<T> match, Action<RoutingContext<T>> callback)
