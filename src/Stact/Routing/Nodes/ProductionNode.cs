@@ -41,6 +41,9 @@ namespace Stact.Routing.Nodes
 
         protected void Accept(RoutingContext<T> context, Action<T> callback)
         {
+            if (_disableOnActivation)
+                _enabled = false;
+
             _engine.Add(context.Priority, () =>
                 {
                     if (!context.IsAlive)
@@ -49,10 +52,7 @@ namespace Stact.Routing.Nodes
                     T body = context.Body;
 
                     context.Evict();
-
-                    if (_disableOnActivation)
-                        _enabled = false;
-
+                    
                     callback(body);
                 });
         }
